@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instant4D — UE5</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <h1>Instant4D</h1>
+                <span class="badge">Unreal Engine 5</span>
+            </div>
+            <div class="header-right">
+                <span id="stream-fps" class="fps-badge">-- FPS</span>
+                <span id="engine-status" class="status-dot disconnected">UE5</span>
+            </div>
+        </header>
+
+        <div class="main-layout">
+            <!-- Left Panel -->
+            <aside class="panel panel-left">
+                <div class="tab-bar">
+                    <button class="tab active" onclick="switchTab('generate')">Generate</button>
+                    <button class="tab" onclick="switchTab('controls')">Controls</button>
+                    <button class="tab" onclick="switchTab('gallery')">Gallery</button>
+                </div>
+
+                <!-- Generate Tab -->
+                <div id="tab-generate" class="tab-content active">
+                    <section class="section">
+                        <h2>AI Scene Generation</h2>
+                        <div class="form-group">
+                            <label for="scene-preset">Scene Preset</label>
+                            <select id="scene-preset" onchange="applyPreset(this.value)">
+                                <option value="">Custom (type your own)</option>
+                                <option value="A busy downtown intersection at sunset with taxis, pedestrians crossing, traffic cones, and a bus stop">Busy Intersection at Sunset</option>
+                                <option value="A rainy night police roadblock with police cars, traffic cones, barriers, and bystanders on the sidewalk">Rainy Night Police Roadblock</option>
+                                <option value="A quiet suburban morning with parked cars, joggers, benches, trash cans, and planters">Quiet Suburban Morning</option>
+                                <option value="A foggy highway accident scene with an ambulance, damaged cars, warning signs, and emergency cones">Highway Accident Scene</option>
+                                <option value="A midnight street race with sports cars, motorcycles, spectators, and traffic cones marking the course">Midnight Street Race</option>
+                                <option value="A construction zone with barriers, cones, warning signs, a pickup truck, and workers">Construction Zone</option>
+                                <option value="A peaceful park at sunset with benches, fountain, pedestrians, planters, and a food truck nearby">Peaceful Park at Sunset</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="prompt">Scene Description</label>
+                            <textarea id="prompt" rows="4" placeholder="A busy city intersection at sunset with cars, pedestrians, and street furniture..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="model">Model</label>
+                            <select id="model">
+                                <option value="sonnet">Sonnet (faster)</option>
+                                <option value="opus">Opus (higher quality)</option>
+                            </select>
+                        </div>
+                        <div class="btn-row" style="gap:6px; margin-bottom:6px;">
+                            <button id="btn-generate" class="btn btn-primary" style="flex:1" onclick="generateScene('new')">New Scene</button>
+                            <button id="btn-edit" class="btn" style="flex:1; background:var(--accent-secondary); color:white;" onclick="generateScene('edit')">Edit Scene</button>
+                        </div>
+                        <div style="text-align:center; margin:4px 0; color:var(--text-muted); font-size:10px;">
+                            New = fresh world | Edit = add to current scene
+                        </div>
+                    </section>
+
+                    <section class="section" style="flex:1; min-height:150px; display:flex; flex-direction:column;">
+                        <div class="log-header">
+                            <h2>Pipeline Log</h2>
+                            <button class="btn btn-sm" onclick="clearLog()">Clear</button>
+                        </div>
+                        <div id="pipeline-log" class="log-box" style="flex:1;">
+                            <div class="log-entry log-info">Ready. Enter a scene description and click Generate.</div>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Controls Tab -->
+                <div id="tab-controls" class="tab-content">
+                    <section class="section">
+                        <h2>Weather</h2>
+                        <select id="weather-preset" onchange="setWeather()">
+                            <option value="clear_noon">Clear Noon</option>
+                            <option value="clear_sunset">Clear Sunset</option>
+                            <option value="clear_night">Clear Night</option>
+                            <option value="cloudy_noon">Cloudy Noon</option>
+                            <option value="cloudy_night">Cloudy Night</option>
+                            <option value="overcast">Overcast</option>
+                            <option value="light_rain">Light Rain</option>
+                            <option value="heavy_rain">Heavy Rain</option>
+                            <option value="rainy_night">Rainy Night</option>
+                            <option value="foggy_morning">Foggy Morning</option>
+                            <option value="stormy">Stormy</option>
+                            <option value="snow">Snow</option>
+                        </select>
+                    </section>
+
+                    <section class="section">
+                        <h2>Level</h2>
+                        <select id="level-select">
+                            <option value="UrbanCity">Urban City</option>
+                            <option value="Downtown">Downtown</option>
+                            <option value="Suburban">Suburban</option>
+                            <option value="Highway">Highway</option>
+                            <option value="Industrial">Industrial</option>
+                            <option value="Park">Park</option>
+                            <option value="Default">Default</option>
+                        </select>
+                        <button class="btn btn-sm" style="margin-top:4px" onclick="loadLevel()">Load Level</button>
+                    </section>
+
+                    <section class="section">
+                        <h2>Spawn Vehicle</h2>
+                        <select id="vehicle-bp">
+                            <option value="/Game/Vehicles/Sedan/BP_Sedan">Sedan</option>
+                            <option value="/Game/Vehicles/SUV/BP_SUV">SUV</option>
+                            <option value="/Game/Vehicles/Truck/BP_Truck">Truck</option>
+                            <option value="/Game/Vehicles/SportsCar/BP_SportsCar">Sports Car</option>
+                            <option value="/Game/Vehicles/Van/BP_Van">Van</option>
+                            <option value="/Game/Vehicles/Bus/BP_Bus">Bus</option>
+                            <option value="/Game/Vehicles/Police/BP_PoliceCar">Police Car</option>
+                            <option value="/Game/Vehicles/Ambulance/BP_Ambulance">Ambulance</option>
+                            <option value="/Game/Vehicles/Taxi/BP_Taxi">Taxi</option>
+                            <option value="/Game/Vehicles/PickupTruck/BP_PickupTruck">Pickup Truck</option>
+                        </select>
+                        <div class="input-row" style="margin-top:4px">
+                            <input type="number" id="spawn-x" value="0" step="100" placeholder="X (cm)">
+                            <input type="number" id="spawn-y" value="0" step="100" placeholder="Y (cm)">
+                            <input type="number" id="spawn-yaw" value="0" step="45" placeholder="Yaw">
+                        </div>
+                        <button class="btn btn-sm" onclick="spawnVehicle()">Spawn</button>
+                    </section>
+
+                    <section class="section">
+                        <h2>Camera</h2>
+                        <div class="info-box" id="camera-info">
+                            <div class="info-row"><span class="info-label">Position</span><span class="info-value" id="cam-pos">--</span></div>
+                            <div class="info-row"><span class="info-label">Rotation</span><span class="info-value" id="cam-rot">--</span></div>
+                        </div>
+                        <div class="form-group" style="margin-top:8px">
+                            <div class="input-row">
+                                <input type="number" id="cam-x" value="0" step="100" placeholder="X">
+                                <input type="number" id="cam-y" value="0" step="100" placeholder="Y">
+                                <input type="number" id="cam-z" value="500" step="100" placeholder="Z">
+                            </div>
+                            <div class="input-row" style="margin-top:4px">
+                                <input type="number" id="cam-pitch" value="-30" step="5" placeholder="Pitch">
+                                <input type="number" id="cam-yaw" value="0" step="15" placeholder="Yaw">
+                            </div>
+                            <button class="btn btn-sm" style="margin-top:4px" onclick="teleportCamera()">Teleport</button>
+                        </div>
+                    </section>
+
+                    <section class="section">
+                        <h2>Player Character</h2>
+                        <div class="btn-row">
+                            <button id="btn-play" class="btn btn-sm btn-play" onclick="enterPlayMode()">Play</button>
+                            <button class="btn btn-sm" onclick="spawnPlayer()">Respawn</button>
+                            <button class="btn btn-sm" onclick="toggleControlMode()">
+                                Toggle Walk/Fly
+                            </button>
+                        </div>
+                        <p style="color:var(--text-muted); font-size:10px; margin-top:4px;">
+                            Click <b>Play</b> to enter third-person mode: WASD walks the character, mouse looks around, camera follows behind like a game. Press ESC to release, TAB to toggle modes.
+                        </p>
+                    </section>
+
+                    <section class="section">
+                        <h2>Actions</h2>
+                        <div class="btn-row">
+                            <button class="btn btn-sm" onclick="saveSnapshot()">Save Snapshot</button>
+                            <button class="btn btn-sm btn-danger" onclick="clearScene()">Clear Scene</button>
+                        </div>
+                    </section>
+
+                    <section class="section">
+                        <h2>Scene Info</h2>
+                        <div id="scene-info" class="info-box"><p>Loading...</p></div>
+                    </section>
+                </div>
+
+                <!-- Gallery Tab -->
+                <div id="tab-gallery" class="tab-content">
+                    <section class="section">
+                        <h2>Rendered Images</h2>
+                        <button class="btn btn-sm" onclick="refreshImages()" style="margin-bottom:8px">Refresh</button>
+                        <div id="image-gallery" class="image-gallery-vertical"></div>
+                    </section>
+                </div>
+            </aside>
+
+            <!-- Center: Live 3D Viewport -->
+            <main class="panel panel-center">
+                <div class="viewport-3d" id="viewport-3d">
+                    <!-- Live MJPEG stream from UE5 Python server -->
+                    <img id="stream-img" class="stream-img" src="" alt="UE5 Live Stream">
+                    <!-- Fallback video element (unused with MJPEG) -->
+                    <video id="stream-video" class="stream-video" autoplay playsinline muted style="display:none"></video>
+
+                    <div class="viewport-hud" id="viewport-hud">
+                        <div class="hud-top-left">
+                            <span id="hud-map">--</span>
+                            <button id="btn-mode-toggle" class="btn btn-sm mode-toggle mode-camera" onclick="toggleControlMode()" title="Toggle Camera/Walk mode (TAB)">Camera Mode</button>
+                        </div>
+                        <div class="hud-top-right"><span id="hud-fps">-- FPS</span></div>
+                        <div class="hud-bottom-left">
+                            <span id="hud-pos">X: -- Y: -- Z: --</span>
+                            <span id="hud-player" class="hud-player-info" style="display:none;">Player: --</span>
+                        </div>
+                        <div class="hud-bottom-center">
+                            <div class="controls-hint" id="controls-hint">
+                                [FLY] Click viewport to enable controls | TAB: Toggle Mode
+                            </div>
+                        </div>
+                        <div class="hud-crosshair" id="crosshair">+</div>
+                    </div>
+
+                    <div class="viewport-placeholder" id="stream-placeholder">
+                        <p>Connecting to UE5...</p>
+                        <p class="hint">Ensure UE5 is running on port 8000 with the Python HTTP server.</p>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

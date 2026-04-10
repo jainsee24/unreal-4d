@@ -1,0 +1,25 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "5.4",
+	"Category": "",
+	"Description": "Instant4D — AI-driven 3D scene generation with multi-agent pipeline",
+	"Modules": [
+		{
+			"Name": "Instant4D",
+			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"Engine"
+			]
+		}
+	],
+	"Plugins": [
+		{ "Name": "RemoteControl", "Enabled": true },
+		{ "Name": "WebRemoteControl", "Enabled": true },
+		{ "Name": "PixelStreaming", "Enabled": true },
+		{ "Name": "PixelStreamingPlayer", "Enabled": true },
+		{ "Name": "PythonScriptPlugin", "Enabled": true },
+		{ "Name": "EditorScriptingUtilities", "Enabled": true },
+		{ "Name": "SequencerScripting", "Enabled": true }
+	]
+}
