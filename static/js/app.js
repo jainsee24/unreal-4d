@@ -36,7 +36,7 @@ function _sendBatchedCameraInput() {
 
     const speed = keysDown.has('shift') ? 4.0 : 1.5;
     let dx = 0, dy = 0, dz = 0;
-    let dyaw = _mouseDx * 0.3;
+    let dyaw = -_mouseDx * 0.3;
     let dpitch = -_mouseDy * 0.3;
     _mouseDx = 0; _mouseDy = 0;
 
@@ -65,7 +65,7 @@ function _sendBatchedPlayerInput() {
 
     const speed = keysDown.has('shift') ? 4.0 : 1.5;
     let forward = 0, right = 0;
-    let dyaw = _mouseDx * 0.3;
+    let dyaw = -_mouseDx * 0.3;
     _mouseDx = 0; _mouseDy = 0;  // consume mouse delta
 
     if (keysDown.has('w')) forward += 1;
